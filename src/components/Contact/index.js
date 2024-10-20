@@ -130,17 +130,15 @@ const Contact = () => {
           </div>
         </div>
         <div className="info-map">
-          Umar Banerjee
+          Umar Liaqat
           <br />
-          Kolkata, <br />
-          West Bengal, <br />
-          India
+          Lahore,Pakistan
           <br />
         </div>
         <div className="map-wrap">
           <MapContainer center={[22.56263, 88.36304]} zoom={13}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <Marker position={[22.56263, 88.36304]}>
+            <Marker position={[32.337, 74.9033]}>
               <Popup>
                 Umar lives here, come over for a cup of coffee :{")"}
               </Popup>
