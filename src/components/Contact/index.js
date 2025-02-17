@@ -29,10 +29,14 @@ const Contact = () => {
 
     emailjs
       .sendForm(
-        process.env.REACT_APP_EMIAL_SERVICE_ID,
-        process.env.REACT_APP_TEMPLATE_ID,
+        // process.env.REACT_APP_EMIAL_SERVICE_ID,
+        // process.env.REACT_APP_TEMPLATE_ID,
+        // form.current,
+        // process.env.REACT_APP_PUBLIC_KEY
+        "service_d9e2026",
+        "template_z2tk8gi",
         form.current,
-        process.env.REACT_APP_PUBLIC_KEY
+        "K6xy_9mruRCI-DrLc"
       )
       .then(
         () => {
@@ -80,11 +84,11 @@ const Contact = () => {
               idx={15}
             />
           </h1>
-          <p>
+          {/* <p>
             I’m always open to new opportunities and collaborations! If you’re
             looking for someone who can bring fresh ideas and deliver impactful
             results, let’s get in touch!
-          </p>
+          </p> */}
 
           <div className="contact-form">
             <form ref={form} onSubmit={sendEmail}>
@@ -136,9 +140,9 @@ const Contact = () => {
           <br />
         </div>
         <div className="map-wrap">
-          <MapContainer center={[22.56263, 88.36304]} zoom={13}>
+          <MapContainer center={[31.582045, 74.329376]} zoom={13}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <Marker position={[32.337, 74.9033]}>
+            <Marker position={[31.582045, 74.329376]}>
               <Popup>
                 Umar lives here, come over for a cup of coffee :{")"}
               </Popup>
