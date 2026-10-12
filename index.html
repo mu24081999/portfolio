@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Muhammad Umar Liaqat — Full Stack Developer</title>
+    <meta name="description" content="Muhammad Umar Liaqat — Full Stack Developer specialising in the MERN stack, TypeScript, Web3 and AI automation. Based in Lahore, Pakistan." />
+    <meta name="theme-color" content="#04060d" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-64.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Muhammad Umar Liaqat — Full Stack Developer" />
+    <meta property="og:description" content="MERN stack, TypeScript, Web3 and AI automation. Based in Lahore, Pakistan." />
+    <meta property="og:image" content="/brand/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Set the theme before first paint (saved choice, else the OS preference) to avoid a flash.
+      (function () {
+        var t = 'dark';
+        try {
+          t = localStorage.getItem('theme');
+          if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        } catch (e) {}
+        document.documentElement.dataset.theme = t;
+        if (t === 'light') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef2f9');
+      })();
+    </script>
+    <link rel="preload" as="image" href="/brand/mark.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
