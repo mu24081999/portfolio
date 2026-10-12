@@ -8,7 +8,7 @@ import { SceneLabel } from '../components/Chrome';
  * dolly shot along the career timeline; each card swings into focus as it reaches centre frame.
  * On small screens (or with reduced motion) it falls back to a vertical timeline.
  */
-export function Experience() {
+export function Experience({ n = '02', headless = false }: { n?: string; headless?: boolean }) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -74,14 +74,16 @@ export function Experience() {
   );
 
   return (
-    <section id="experience" className="section experience" ref={root}>
+    <section className="section experience" ref={root} data-scene="Journey">
       <div className="exp-pin">
         <div className="container section-head exp-head">
-          <SceneLabel n="04">Experience</SceneLabel>
+          {!headless && <SceneLabel n={n}>Experience</SceneLabel>}
           <div className="exp-head-row">
-            <h2 className="section-title reveal-up">
-              The <span className="gradient-text">journey.</span>
-            </h2>
+            {!headless && (
+              <h2 className="section-title reveal-up">
+                The <span className="gradient-text">journey.</span>
+              </h2>
+            )}
             <p className="mono exp-hint reveal-up">2022 → Present · scroll ⟶</p>
           </div>
         </div>

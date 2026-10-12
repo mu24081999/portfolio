@@ -1,25 +1,28 @@
 import { useRef, type PointerEvent } from 'react';
+import { Link } from 'react-router';
 import { gsap, SplitText, useGSAP, MOTION, DESKTOP, countUp, revealUp } from '../lib/motion';
 import { education, languages, profile, stats, summary, summaryExtra } from '../data';
-import { Mark, SceneLabel } from '../components/Chrome';
-import { PinIcon } from '../components/Icons';
+import { SceneLabel } from '../components/Chrome';
+import { ArrowUpRight, DownloadIcon, PinIcon } from '../components/Icons';
 
 function tilt(e: PointerEvent<HTMLDivElement>) {
   const el = e.currentTarget;
   const r = el.getBoundingClientRect();
   const px = (e.clientX - r.left) / r.width - 0.5;
   const py = (e.clientY - r.top) / r.height - 0.5;
-  gsap.to(el, { rotateY: px * 14, rotateX: -py * 14, duration: 0.6, ease: 'power3.out' });
+  gsap.to(el, { rotateY: px * 12, rotateX: -py * 12, duration: 0.6, ease: 'power3.out' });
 }
 const untilt = (e: PointerEvent<HTMLDivElement>) =>
   gsap.to(e.currentTarget, { rotateY: 0, rotateX: 0, duration: 0.9, ease: 'elastic.out(1, 0.5)' });
 
 /**
- * Scene 02 — About. On desktop the scene pins while the summary "lights up" word by word,
- * and the ID card swings in from the side in 3D.
+ * Founder scene. On desktop it pins while the summary "lights up" word by word,
+ * and the photo card swings in from the side in 3D.
+ * `teaser` (home page) links on to /about; `full` adds education, languages and the résumé.
  */
-export function About() {
+export function Founder({ n, variant }: { n: string; variant: 'teaser' | 'full' }) {
   const root = useRef<HTMLElement>(null);
+  const full = variant === 'full';
 
   useGSAP(
     () => {
@@ -42,7 +45,7 @@ export function About() {
           },
         );
 
-        gsap.from('.id-card-wrap', {
+        gsap.from('.photo-card-wrap', {
           rotateY: -35,
           x: -120,
           autoAlpha: 0,
@@ -66,23 +69,33 @@ export function About() {
   );
 
   return (
-    <section id="about" className="section about" ref={root}>
+    <section className="section about" ref={root} data-scene="Founder">
       <div className="about-pin">
         <div className="container about-grid">
           <div className="about-visual">
-            <div className="id-card-wrap">
-              <div className="id-card glass" onPointerMove={tilt} onPointerLeave={untilt}>
-                <div className="id-card-top">
-                  <span className="mono">ID · DEV-2017</span>
-                  <span className="status-dot" />
+            <div className="photo-card-wrap">
+              <div className="photo-card glass" onPointerMove={tilt} onPointerLeave={untilt}>
+                <div className="photo-frame">
+                  <picture>
+                    <source srcSet={profile.photoWebp} type="image/webp" />
+                    <img
+                      src={profile.photo}
+                      alt={`${profile.name}, ${profile.founderTitle} at ${profile.brand}`}
+                      width={400}
+                      height={400}
+                      loading={full ? 'eager' : 'lazy'}
+                    />
+                  </picture>
+                  <span className="photo-badge glass">
+                    <span className="status-dot" /> Available
+                  </span>
                 </div>
-                <div className="id-avatar">
-                  <Mark />
-                </div>
-                <div className="id-name">{profile.name}</div>
-                <div className="id-role">{profile.tagline}</div>
-                <div className="id-loc">
-                  <PinIcon width={14} height={14} /> {profile.location}
+                <div className="photo-meta">
+                  <div className="id-name">{profile.name}</div>
+                  <div className="id-role">{profile.founderTitle}</div>
+                  <div className="id-loc">
+                    <PinIcon width={14} height={14} /> {profile.location}
+                  </div>
                 </div>
                 <div className="id-card-shine" aria-hidden />
               </div>
@@ -101,27 +114,51 @@ export function About() {
           </div>
 
           <div className="about-copy">
-            <SceneLabel n="02">About me</SceneLabel>
-            <h2 className="section-title reveal-up">
-              Engineer. Team lead. <span className="gradient-text">Problem solver.</span>
-            </h2>
+            <SceneLabel n={n}>{full ? 'The founder' : 'Who builds it'}</SceneLabel>
+            {full ? (
+              <h2 className="section-title reveal-up">
+                Engineer. Team lead. <span className="gradient-text">Problem solver.</span>
+              </h2>
+            ) : (
+              <h2 className="section-title reveal-up">
+                Led by an engineer, <span className="gradient-text">hands on code.</span>
+              </h2>
+            )}
             <p className="about-reveal">{summary}</p>
             <p className="muted reveal-up">{summaryExtra}</p>
-            <div className="about-facts">
-              <div className="fact glass reveal-up">
-                <span className="mono fact-k">Education</span>
-                <strong>{education.degree}</strong>
-                <span className="muted">
-                  {education.school} · {education.period} · {education.note}
-                </span>
+            {full ? (
+              <>
+                <div className="about-facts">
+                  <div className="fact glass reveal-up">
+                    <span className="mono fact-k">Education</span>
+                    <strong>{education.degree}</strong>
+                    <span className="muted">
+                      {education.school} · {education.period} · {education.note}
+                    </span>
+                  </div>
+                  <div className="fact glass reveal-up">
+                    <span className="mono fact-k">Languages</span>
+                    {languages.map((l) => (
+                      <span key={l}>{l}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="about-actions reveal-up">
+                  <a className="btn btn-ghost glass" href={profile.resume} download>
+                    <DownloadIcon /> Download résumé
+                  </a>
+                  <Link className="text-link" to="/experience">
+                    See the full journey <ArrowUpRight width={16} height={16} />
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="about-actions reveal-up">
+                <Link className="btn btn-ghost glass" to="/about">
+                  More about Umar <ArrowUpRight />
+                </Link>
               </div>
-              <div className="fact glass reveal-up">
-                <span className="mono fact-k">Languages</span>
-                {languages.map((l) => (
-                  <span key={l}>{l}</span>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

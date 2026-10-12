@@ -1,13 +1,29 @@
-import { useRef, type CSSProperties } from 'react';
+import { useRef, type CSSProperties, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import { gsap, useGSAP, MOTION, revealUp } from '../lib/motion';
-import { projects } from '../data';
+import type { Project } from '../data';
 import { SceneLabel } from '../components/Chrome';
+import { ArrowUpRight } from '../components/Icons';
 
 /**
- * Scene 05 — Work. Project panels are sticky and stack like a deck: as each new card slides up,
- * the one beneath recedes (scales down, dims, tips back).
+ * Work scene. Project panels are sticky and stack like a deck: as each new card slides up,
+ * the one beneath recedes (scales down, dims, tips back). Each card opens its case study.
  */
-export function Projects() {
+export function ProjectStack({
+  items,
+  n,
+  title,
+  sub,
+  footer,
+  headless = false,
+}: {
+  items: Project[];
+  n: string;
+  title?: ReactNode;
+  sub?: string;
+  footer?: ReactNode;
+  headless?: boolean;
+}) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -23,7 +39,7 @@ export function Projects() {
             stagger: 0.07,
             duration: 1,
             ease: 'expo.out',
-            scrollTrigger: { trigger: card, start: 'top 75%', toggleActions: 'play none none reverse' },
+            scrollTrigger: { trigger: card, start: 'top 80%', toggleActions: 'play none none reverse' },
           });
           gsap.from(card.querySelector('.pc-visual'), {
             scale: 1.25,
@@ -43,30 +59,38 @@ export function Projects() {
   );
 
   return (
-    <section id="projects" className="section projects" ref={root}>
+    <section className={`section projects ${headless ? 'is-headless' : ''}`} ref={root} data-scene="Work">
       <div className="container">
-        <div className="section-head">
-          <SceneLabel n="05">Selected work</SceneLabel>
-          <h2 className="section-title reveal-up">
-            Things I've <span className="gradient-text">shipped.</span>
-          </h2>
-          <p className="section-sub muted reveal-up">
-            Products and platforms from my roles and personal builds: real-time communication, Web3, CRM and marketplaces.
-          </p>
-        </div>
+        {!headless && (
+          <div className="section-head">
+            <SceneLabel n={n}>Selected work</SceneLabel>
+            <h2 className="section-title reveal-up">
+              {title ?? (
+                <>
+                  Things we've <span className="gradient-text">shipped.</span>
+                </>
+              )}
+            </h2>
+            {sub && <p className="section-sub muted reveal-up">{sub}</p>}
+          </div>
+        )}
 
         <div className="stack">
-          {projects.map((p, i) => (
-            <article key={p.title} className="stack-card glass" style={{ '--i': i, '--accent': p.accent } as CSSProperties}>
+          {items.map((p, i) => (
+            <article key={p.slug} className="stack-card glass" style={{ '--i': i, '--accent': p.accent } as CSSProperties}>
               <div className="pc-body">
                 <div className="pc-top pc-reveal">
-                  <span className="mono pc-index">{String(i + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>
+                  <span className="mono pc-index">
+                    {String(i + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                  </span>
                   <span className="mono pc-kind">{p.kind}</span>
                 </div>
-                <h3 className="pc-title pc-reveal">{p.title}</h3>
+                <h3 className="pc-title pc-reveal">
+                  <Link to={`/projects/${p.slug}`}>{p.title}</Link>
+                </h3>
                 <p className="pc-desc pc-reveal">{p.description}</p>
                 <ul className="pc-highlights pc-reveal">
-                  {p.highlights.map((h) => (
+                  {p.highlights.slice(0, 2).map((h) => (
                     <li key={h}>{h}</li>
                   ))}
                 </ul>
@@ -77,6 +101,9 @@ export function Projects() {
                     </span>
                   ))}
                 </div>
+                <Link to={`/projects/${p.slug}`} className="card-link pc-reveal">
+                  View case study <ArrowUpRight width={16} height={16} />
+                </Link>
               </div>
               <div className="pc-visual" aria-hidden>
                 <div className="pc-orb" />
@@ -104,6 +131,7 @@ export function Projects() {
             </article>
           ))}
         </div>
+        {footer && <div className="section-foot reveal-up">{footer}</div>}
       </div>
     </section>
   );

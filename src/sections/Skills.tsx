@@ -7,7 +7,7 @@ import { SceneLabel } from '../components/Chrome';
  * Scene 03 — Arsenal. Two marquee bands drift in opposite directions (speeding up with scroll),
  * and the skill panels rise out of depth, tilting flat as they land.
  */
-export function Skills() {
+export function Skills({ n = '03' }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -44,7 +44,7 @@ export function Skills() {
   const band = [...marquee, ...marquee];
 
   return (
-    <section id="skills" className="section skills" ref={root}>
+    <section className="section skills" ref={root} data-scene="Arsenal">
       <div className="marquees" aria-hidden>
         <div className="marquee marquee-a">
           {band.map((t, i) => (
@@ -60,12 +60,12 @@ export function Skills() {
 
       <div className="container">
         <div className="section-head">
-          <SceneLabel n="03">Skills</SceneLabel>
+          <SceneLabel n={n}>Skills</SceneLabel>
           <h2 className="section-title reveal-up">
             The <span className="gradient-text">arsenal.</span>
           </h2>
           <p className="section-sub muted reveal-up">
-            The tools I use to take products from idea to production: front end, back end, data, Web3, AI and the pipelines that ship them.
+            The tools we use to take products from idea to production: front end, back end, data, Web3, AI and the pipelines that ship them.
           </p>
         </div>
 

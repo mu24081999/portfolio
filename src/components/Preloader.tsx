@@ -3,6 +3,20 @@ import { gsap, useGSAP, prefersReducedMotion } from '../lib/motion';
 import { profile } from '../data';
 import { Mark } from './Chrome';
 
+// Decided once per page load (not per effect run): the full intro plays on a visitor's first page view this session.
+let firstView: boolean | null = null;
+function isFirstView() {
+  if (firstView === null) {
+    try {
+      firstView = sessionStorage.getItem('intro-seen') !== '1';
+      sessionStorage.setItem('intro-seen', '1');
+    } catch {
+      firstView = true;
+    }
+  }
+  return firstView;
+}
+
 /** Letterbox intro: a counter runs, the title card fades, then the black bars part to reveal the hero. */
 export function Preloader({ onReveal }: { onReveal: () => void }) {
   const root = useRef<HTMLDivElement>(null);
@@ -12,6 +26,17 @@ export function Preloader({ onReveal }: { onReveal: () => void }) {
     () => {
       if (prefersReducedMotion()) {
         gsap.to(root.current, { autoAlpha: 0, duration: 0.3, onComplete: onReveal });
+        return;
+      }
+      if (!isFirstView()) {
+        // Returning visitor: skip the title card, just part the bars.
+        gsap
+          .timeline()
+          .set('.pl-center', { autoAlpha: 0 })
+          .add(onReveal, 0.1)
+          .to('.pl-bar-top', { yPercent: -100, duration: 1, ease: 'expo.inOut' }, 0.1)
+          .to('.pl-bar-bottom', { yPercent: 100, duration: 1, ease: 'expo.inOut' }, 0.1)
+          .set(root.current, { display: 'none' });
         return;
       }
       const counter = { v: 0 };

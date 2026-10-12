@@ -1,7 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { gsap, SplitText, useGSAP, MOTION, revealUp, scrollToTarget } from '../lib/motion';
-import { profile } from '../data';
-import { Logo, SceneLabel } from '../components/Chrome';
+import { gsap, useGSAP, MOTION, revealUp } from '../lib/motion';
+import { profile, services } from '../data';
 import { ArrowUpRight, ChatIcon, GitHubIcon, LinkedInIcon, MailIcon, PhoneIcon, PinIcon, SendIcon } from '../components/Icons';
 
 const channels = [
@@ -11,7 +10,7 @@ const channels = [
   { icon: GitHubIcon, label: 'GitHub', value: profile.githubLabel, href: profile.github, external: true },
 ];
 
-/** Scene 07 — Contact. The closing title rises line by line out of a mask; the form panel slides up. */
+/** Contact scene: channels slide in from the left, the project brief form rises into place. */
 export function Contact() {
   const root = useRef<HTMLElement>(null);
   const [sent, setSent] = useState(false);
@@ -19,21 +18,13 @@ export function Contact() {
   useGSAP(
     () => {
       gsap.matchMedia().add(MOTION, () => {
-        const split = SplitText.create('.contact-title', { type: 'words,lines', mask: 'lines' });
-        gsap.from(split.lines, {
-          yPercent: 110,
-          stagger: 0.12,
-          duration: 1.4,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: '.contact-title', start: 'top 85%', toggleActions: 'play none none reverse' },
-        });
         gsap.from('.channel', {
           x: -50,
           autoAlpha: 0,
           stagger: 0.1,
           duration: 1,
           ease: 'expo.out',
-          scrollTrigger: { trigger: '.channels', start: 'top 85%', toggleActions: 'play none none reverse' },
+          scrollTrigger: { trigger: '.channels', start: 'top 92%', toggleActions: 'play none none reverse' },
         });
         gsap.from('.contact-form', {
           y: 100,
@@ -42,53 +33,44 @@ export function Contact() {
           ease: 'power2.out',
           scrollTrigger: { trigger: '.contact-form', start: 'top 100%', end: 'top 55%', scrub: 1 },
         });
-        gsap.from('.footer-giant', {
-          yPercent: 40,
-          autoAlpha: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'bottom bottom', scrub: true },
-        });
         revealUp(root.current);
-        return () => split.revert();
       });
     },
     { scope: root },
   );
 
-  // No backend: compose the message in the visitor's mail app.
+  // No backend: compose the brief in the visitor's mail app.
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const subject = String(data.get('subject') || 'Project inquiry');
-    const body = `${data.get('message')}\n\n— ${data.get('name')} (${data.get('email')})`;
+    const service = String(data.get('service') || '');
+    const subject = `${service ? `${service} — ` : ''}Project inquiry from ${data.get('name')}`;
+    const body = [
+      String(data.get('message')),
+      '',
+      `Service: ${service || 'Not sure yet'}`,
+      `Budget: ${data.get('budget') || 'Not specified'}`,
+      `— ${data.get('name')}${data.get('company') ? `, ${data.get('company')}` : ''} (${data.get('email')})`,
+    ].join('\n');
     window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);
   };
 
   return (
-    <section id="contact" className="section contact" ref={root}>
+    <section className="section contact" ref={root} data-scene="Contact">
       <div className="container">
-        <SceneLabel n="07">Contact</SceneLabel>
-        <h2 className="contact-title">
-          Let's build something <span className="gradient-text">remarkable.</span>
-        </h2>
-
         <div className="contact-grid">
           <div className="contact-left">
+            <h2 className="contact-sub reveal-up">Talk to the team</h2>
             <p className="muted reveal-up">
-              Have a product to build, a team that needs a technical lead, or a workflow to automate? Tell me about it. I usually reply within a day.
+              Building a product, need a technical lead, or want to automate a workflow? Share a few details and you'll get a reply — usually within a day.
             </p>
             <div className="status-pill glass reveal-up">
-              <span className="status-dot" /> Open to freelance &amp; full-time roles
+              <span className="status-dot" /> Accepting new projects
             </div>
             <div className="channels">
               {channels.map(({ icon: Icon, label, value, href, external }) => (
-                <a
-                  key={label}
-                  className="channel glass"
-                  href={href}
-                  {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-                >
+                <a key={label} className="channel glass" href={href} {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}>
                   <span className="channel-icon">
                     <Icon />
                   </span>
@@ -100,12 +82,13 @@ export function Contact() {
                 </a>
               ))}
             </div>
-            <p className="contact-loc muted reveal-up">
-              <PinIcon width={14} height={14} /> {profile.location} · <PhoneIcon width={14} height={14} /> {profile.phone}
-            </p>
+            <address className="contact-loc muted reveal-up">
+              <PinIcon width={14} height={14} /> {profile.brand}, {profile.location} · <PhoneIcon width={14} height={14} />{' '}
+              <a href={`tel:${profile.phoneE164}`}>{profile.phone}</a>
+            </address>
           </div>
 
-          <form className="contact-form glass" onSubmit={onSubmit}>
+          <form className="contact-form glass" onSubmit={onSubmit} aria-label="Project inquiry">
             <div className="form-row">
               <label>
                 <span>Name</span>
@@ -116,46 +99,43 @@ export function Contact() {
                 <input name="email" type="email" required placeholder="you@company.com" autoComplete="email" />
               </label>
             </div>
+            <div className="form-row">
+              <label>
+                <span>Company</span>
+                <input name="company" placeholder="Company (optional)" autoComplete="organization" />
+              </label>
+              <label>
+                <span>Service</span>
+                <select name="service" defaultValue="">
+                  <option value="">Not sure yet</option>
+                  {services.map((s) => (
+                    <option key={s.slug} value={s.title}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <label>
-              <span>Subject</span>
-              <input name="subject" placeholder="Project inquiry" />
+              <span>Budget</span>
+              <select name="budget" defaultValue="">
+                <option value="">Prefer to discuss</option>
+                <option>Under $5k</option>
+                <option>$5k – $15k</option>
+                <option>$15k – $50k</option>
+                <option>$50k+</option>
+              </select>
             </label>
             <label>
-              <span>Message</span>
-              <textarea name="message" required rows={5} placeholder="Tell me about your project, timeline and goals…" />
+              <span>Project details</span>
+              <textarea name="message" required rows={5} placeholder="What are you building, who is it for, and when do you need it?" />
             </label>
             <button className="btn btn-primary btn-block" type="submit">
-              {sent ? 'Opening your mail app…' : 'Send message'} <SendIcon />
+              {sent ? 'Opening your mail app…' : 'Send project brief'} <SendIcon />
             </button>
           </form>
         </div>
       </div>
-
-      <footer className="footer">
-        <div className="footer-giant" aria-hidden>
-          UMAR LIAQAT
-        </div>
-        <div className="container footer-row">
-          <div className="footer-brand">
-            <Logo />
-            <span className="muted">© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
-          </div>
-          <div className="footer-links">
-            <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub">
-              <GitHubIcon />
-            </a>
-            <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
-              <LinkedInIcon />
-            </a>
-            <a href={`mailto:${profile.email}`} aria-label="Email">
-              <MailIcon />
-            </a>
-            <button className="mono back-top" onClick={() => scrollToTarget('#home')}>
-              Back to top ↑
-            </button>
-          </div>
-        </div>
-      </footer>
     </section>
   );
 }

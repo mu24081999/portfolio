@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { gsap, SplitText, useGSAP, MOTION, scrollToTarget } from '../lib/motion';
+import { Link } from 'react-router';
+import { gsap, SplitText, useGSAP, MOTION } from '../lib/motion';
+import { useReady } from '../components/Chrome';
 import { profile } from '../data';
-import { ArrowDown, ArrowUpRight, DownloadIcon } from '../components/Icons';
+import { ArrowDown, ArrowUpRight } from '../components/Icons';
 
 function RoleCycler() {
   const [i, setI] = useState(0);
@@ -22,8 +24,9 @@ function RoleCycler() {
  * Scene 01 — Opening. The title assembles character by character after the letterbox opens;
  * scrolling then pushes the camera "through" the title (scale + blur + fade) while the rings spin away.
  */
-export function Hero({ ready }: { ready: boolean }) {
+export function Hero() {
   const root = useRef<HTMLElement>(null);
+  const ready = useReady();
 
   useGSAP(
     () => {
@@ -78,37 +81,30 @@ export function Hero({ ready }: { ready: boolean }) {
   );
 
   return (
-    <section id="home" className="hero" ref={root}>
+    <section className="hero" ref={root} data-scene="Opening">
       <div className="hero-pin">
         <div className="hero-ring hero-ring-1" aria-hidden />
         <div className="hero-ring hero-ring-2" aria-hidden />
         <div className="hero-beam" aria-hidden />
         <div className="hero-inner container">
           <div className="hero-fade status-pill glass">
-            <span className="status-dot" /> Available for new projects · {profile.location}
+            <span className="status-dot" /> Accepting new projects · {profile.location}
           </div>
-          <h1 className="hero-name" aria-label={profile.name}>
-            <span className="line line-1">{profile.firstLine}</span>
-            <span className="line gradient-text">{profile.lastLine}</span>
+          <h1 className="hero-name" aria-label={`${profile.brand} — Software Development Services`}>
+            <span className="line line-1">Software Development Studio</span>
+            <span className="line gradient-text">{profile.brand}</span>
           </h1>
           <p className="hero-role hero-fade">
             <RoleCycler />
           </p>
           <p className="hero-copy hero-fade">{profile.intro}</p>
           <div className="hero-ctas hero-fade">
-            <a
-              className="btn btn-primary"
-              href="#projects"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToTarget('#projects');
-              }}
-            >
-              View my work <ArrowUpRight />
-            </a>
-            <a className="btn btn-ghost glass" href={profile.resume} download>
-              <DownloadIcon /> Résumé
-            </a>
+            <Link className="btn btn-primary" to="/contact">
+              Start a project <ArrowUpRight />
+            </Link>
+            <Link className="btn btn-ghost glass" to="/services">
+              Explore services
+            </Link>
           </div>
         </div>
         <div className="scroll-cue hero-fade" aria-hidden>

@@ -37,11 +37,20 @@ export function lockScroll(locked: boolean) {
   else lenis?.start();
 }
 
-export function scrollToTarget(selector: string) {
-  const el = document.querySelector<HTMLElement>(selector);
-  if (!el) return;
+export function scrollToElement(el: HTMLElement) {
   if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: (t) => 1 - Math.pow(1 - t, 4) });
   else el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+}
+
+export function scrollToTarget(selector: string) {
+  const el = document.querySelector<HTMLElement>(selector);
+  if (el) scrollToElement(el);
+}
+
+/** Jump to the top instantly (used when a new page mounts). */
+export function resetScroll() {
+  lenis?.scrollTo(0, { immediate: true, force: true });
+  window.scrollTo(0, 0);
 }
 
 /** Counts every `[data-count]` inside `scope` up from zero when it enters view. */

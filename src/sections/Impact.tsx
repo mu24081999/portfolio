@@ -4,7 +4,7 @@ import { achievements, interests } from '../data';
 import { SceneLabel } from '../components/Chrome';
 
 /** Scene 06 — Impact. A statement line types itself in with scroll, then the metric tiles zoom out of the blur. */
-export function Impact() {
+export function Impact({ n = '06' }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -34,11 +34,11 @@ export function Impact() {
   );
 
   return (
-    <section id="impact" className="section impact" ref={root}>
+    <section className="section impact" ref={root} data-scene="Impact">
       <div className="container">
-        <SceneLabel n="06">Impact</SceneLabel>
+        <SceneLabel n={n}>Impact</SceneLabel>
         <p className="impact-statement">
-          I care about results you can measure: faster systems, fewer manual hours, and products that scale when users arrive.
+          We care about results you can measure: faster systems, fewer manual hours, and products that scale when users arrive.
         </p>
         <div className="impact-grid">
           {achievements.map((a) => (

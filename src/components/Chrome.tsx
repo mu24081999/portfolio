@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
-import { gsap, useGSAP, scrollToTarget } from '../lib/motion';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Link, NavLink } from 'react-router';
+import { gsap, useGSAP, scrollToElement } from '../lib/motion';
 import { getTheme, setTheme, watchSystemTheme, type Theme } from '../lib/theme';
 import { MoonIcon, SunIcon } from './Icons';
-import { profile, scenes } from '../data';
+import { profile } from '../data';
+
+/** True once the opening letterbox has parted, so scene intros can start. */
+export const ReadyContext = createContext(false);
+export const useReady = () => useContext(ReadyContext);
 
 /** Fixed atmosphere: drifting light orbs (tinted per scene), a perspective grid, film grain and a vignette. */
 export function Background() {
@@ -33,7 +38,7 @@ export function Background() {
 export function Logo({ className = '' }: { className?: string }) {
   return (
     <span className={`logo ${className}`}>
-      <img className="logo-img logo-on-dark" src="/brand/logo-dark.png" alt={profile.name} width={1387} height={401} />
+      <img className="logo-img logo-on-dark" src="/brand/logo-dark.png" alt={profile.brand} width={1387} height={401} />
       <img className="logo-img logo-on-light" src="/brand/logo-light.png" alt="" aria-hidden width={1387} height={401} />
     </span>
   );
@@ -44,8 +49,10 @@ export function Mark({ className = '' }: { className?: string }) {
 }
 
 export function ThemeToggle() {
-  const [theme, setLocal] = useState<Theme>(() => getTheme());
+  // Server render assumes dark; the real theme is read after hydration (icons are CSS-driven, so nothing flashes).
+  const [theme, setLocal] = useState<Theme>('dark');
   useEffect(() => {
+    setLocal(getTheme());
     const onTheme = (e: Event) => setLocal((e as CustomEvent<Theme>).detail);
     window.addEventListener('themechange', onTheme);
     const unwatch = watchSystemTheme();
@@ -71,10 +78,15 @@ export function ThemeToggle() {
   );
 }
 
-const navLinks = scenes.filter((s) => !['home', 'impact'].includes(s.id));
-const navLabel: Record<string, string> = { skills: 'Skills', experience: 'Experience', projects: 'Projects' };
+export const navLinks = [
+  { to: '/services', label: 'Services' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/about', label: 'About' },
+  { to: '/experience', label: 'Experience' },
+  { to: '/contact', label: 'Contact' },
+];
 
-export function Nav({ active }: { active: string }) {
+export function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -85,76 +97,79 @@ export function Nav({ active }: { active: string }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const go = (e: MouseEvent, id: string) => {
-    e.preventDefault();
-    setOpen(false);
-    scrollToTarget(`#${id}`);
-  };
+  const close = () => setOpen(false);
 
   return (
     <header className={`nav ${scrolled ? 'is-scrolled' : ''} ${open ? 'is-open' : ''}`}>
       <div className="nav-inner glass">
-        <a href="#home" className="nav-logo" onClick={(e) => go(e, 'home')}>
+        <Link to="/" className="nav-logo" onClick={close} aria-label={`${profile.brand} — home`}>
           <Logo />
-        </a>
-        <nav className="nav-links" aria-label="Sections">
-          {navLinks.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className={active === s.id ? 'is-active' : ''} onClick={(e) => go(e, s.id)}>
-              {navLabel[s.id] ?? s.label}
-            </a>
+        </Link>
+        <nav className="nav-links" aria-label="Main">
+          {navLinks.map((l) => (
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => (isActive ? 'is-active' : '')}>
+              {l.label}
+            </NavLink>
           ))}
         </nav>
         <ThemeToggle />
-        <a href="#contact" className="btn btn-primary btn-sm nav-cta" onClick={(e) => go(e, 'contact')}>
-          Hire me
-        </a>
+        <Link to="/contact" className="btn btn-primary btn-sm nav-cta">
+          Start a project
+        </Link>
         <button className="nav-toggle" aria-label="Toggle menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
           <span />
           <span />
         </button>
       </div>
       <div className="nav-sheet glass" aria-hidden={!open}>
-        {navLinks.map((s, i) => (
-          <a key={s.id} href={`#${s.id}`} onClick={(e) => go(e, s.id)} style={{ transitionDelay: `${open ? 80 + i * 50 : 0}ms` }} tabIndex={open ? 0 : -1}>
+        {navLinks.map((l, i) => (
+          <NavLink
+            key={l.to}
+            to={l.to}
+            onClick={close}
+            style={{ transitionDelay: `${open ? 80 + i * 50 : 0}ms` }}
+            tabIndex={open ? 0 : -1}
+          >
             <span className="mono">0{i + 1}</span>
-            {navLabel[s.id] ?? s.label}
-          </a>
+            {l.label}
+          </NavLink>
         ))}
       </div>
     </header>
   );
 }
 
+export type SceneRef = { label: string; el: HTMLElement };
+
 /** Film-style HUD: scene counter bottom-left, chapter dots on the right, and a top progress bar. */
-export function SceneHUD({ active }: { active: string }) {
-  const idx = Math.max(0, scenes.findIndex((s) => s.id === active));
+export function SceneHUD({ scenes, active }: { scenes: SceneRef[]; active: number }) {
   const pad = (n: number) => String(n).padStart(2, '0');
+  const current = scenes[active];
   return (
     <>
       <div className="progress" aria-hidden>
         <span />
       </div>
-      <div className="hud" aria-hidden>
-        <span className="hud-rec" />
-        <span className="mono">SC {pad(idx + 1)}</span>
-        <span className="hud-sep">/ {pad(scenes.length)}</span>
-        <span className="hud-title" key={active}>
-          {scenes[idx].label}
-        </span>
-      </div>
-      <nav className="chapters" aria-label="Scenes">
-        {scenes.map((s, i) => (
-          <button
-            key={s.id}
-            className={i === idx ? 'is-active' : ''}
-            onClick={() => scrollToTarget(`#${s.id}`)}
-            aria-label={`Go to ${s.label}`}
-          >
-            <span className="chapter-label">{s.label}</span>
-            <span className="chapter-dot" />
-          </button>
-        ))}
-      </nav>
+      {current && (
+        <div className="hud" aria-hidden>
+          <span className="hud-rec" />
+          <span className="mono">SC {pad(active + 1)}</span>
+          <span className="hud-sep">/ {pad(scenes.length)}</span>
+          <span className="hud-title" key={current.label}>
+            {current.label}
+          </span>
+        </div>
+      )}
+      {scenes.length > 1 && (
+        <nav className="chapters" aria-label="Page sections">
+          {scenes.map((s, i) => (
+            <button key={s.label + i} className={i === active ? 'is-active' : ''} onClick={() => scrollToElement(s.el)} aria-label={`Go to ${s.label}`}>
+              <span className="chapter-label">{s.label}</span>
+              <span className="chapter-dot" />
+            </button>
+          ))}
+        </nav>
+      )}
     </>
   );
 }
