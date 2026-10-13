@@ -7,6 +7,8 @@ import { SceneLabel } from '../components/Chrome';
 import { CtaBand, FaqList, PageHero, ProcessSection, ServiceCards } from '../components/Blocks';
 import { ArrowUpRight } from '../components/Icons';
 import NotFound from './NotFound';
+import { posts } from '../blog';
+import { PostGrid } from './Blog';
 
 export function ServicesPage() {
   const root = useRef<HTMLElement>(null);
@@ -142,6 +144,14 @@ export function ServiceDetailPage() {
 
       <ProcessSection n="03" />
       <FaqList n="04" items={service.faqs} heading={`${service.title}: FAQ`} />
+      {posts.some((p) => p.service === service.slug) && (
+        <section className="section" data-scene="Guides">
+          <div className="container">
+            <h2 className="sub-title">Guides on {service.title.toLowerCase()}</h2>
+            <PostGrid items={posts.filter((p) => p.service === service.slug)} />
+          </div>
+        </section>
+      )}
 
       <section className="section other-services" data-scene="More services">
         <div className="container">

@@ -31,7 +31,9 @@ export function PageHero({
   lead,
   crumbs,
   children,
+  small = false,
 }: {
+  small?: boolean;
   label: string;
   title: ReactNode;
   lead?: ReactNode;
@@ -71,7 +73,7 @@ export function PageHero({
   );
 
   return (
-    <section className="page-hero" ref={root} data-scene={label}>
+    <section className={`page-hero ${small ? 'is-small' : ''}`} ref={root} data-scene={label}>
       <div className="ph-ring" aria-hidden />
       <div className="container ph-inner">
         <Breadcrumbs crumbs={crumbs} />

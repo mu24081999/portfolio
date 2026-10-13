@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import { ServiceDetailPage, ServicesPage } from './pages/Services';
 import { ProjectDetailPage, ProjectsPage } from './pages/Projects';
 import { AboutPage, ContactPage, ExperiencePage, SitemapPage } from './pages/Simple';
+import { BlogIndexPage, BlogPostPage } from './pages/Blog';
 import NotFound from './pages/NotFound';
 
 /** Runs before the new page's own effects, so its scroll scenes measure from the top. */
@@ -110,6 +111,8 @@ export default function App() {
           <Route path="/services/:slug" element={<ServiceDetailPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:slug" element={<ProjectDetailPage />} />
+          <Route path="/blog" element={<BlogIndexPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/experience" element={<ExperiencePage />} />
           <Route path="/contact" element={<ContactPage />} />

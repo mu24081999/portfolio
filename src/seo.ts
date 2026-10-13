@@ -1,4 +1,5 @@
 import { experience, profile, projects, services, serviceBySlug, projectBySlug, skills, education } from './data';
+import { posts, postBySlug } from './blog';
 
 /** Public origin used for canonical URLs, the sitemap and structured data. Override with VITE_SITE_URL. */
 export const SITE_URL = String(import.meta.env.VITE_SITE_URL || 'https://devumar-portfolio.vercel.app').replace(/\/$/, '');
@@ -21,6 +22,7 @@ export type Seo = {
   crumbs: Crumb[];
   priority: number;
   changefreq: 'weekly' | 'monthly' | 'yearly';
+  lastmod?: string;
   graph: Record<string, unknown>[];
 };
 
@@ -139,6 +141,7 @@ function page(
 
 const SERVICES: Crumb = { name: 'Services', path: '/services' };
 const PROJECTS: Crumb = { name: 'Projects', path: '/projects' };
+const BLOG: Crumb = { name: 'Blog', path: '/blog' };
 
 export function getSeo(path: string): Seo | null {
   const clean = path.replace(/\/+$/, '') || '/';
@@ -241,6 +244,60 @@ export function getSeo(path: string): Seo | null {
     });
   }
 
+  if (clean === '/blog')
+    return page(
+      '/blog',
+      `Blog — Web, AI, Web3 & DevOps Guides | ${BRAND}`,
+      'Practical guides on custom web app costs, MERN vs Next.js, AI chatbots, custom CRMs, Web3 wallet integration and Docker CI/CD — from real project experience.',
+      {
+        crumbs: [HOME, BLOG],
+        priority: 0.8,
+        changefreq: 'weekly',
+        pageType: 'CollectionPage',
+        extra: [
+          {
+            '@type': 'Blog',
+            '@id': `${abs('/blog')}#blog`,
+            name: `${BRAND} Blog`,
+            url: abs('/blog'),
+            publisher: { '@id': ORG_ID },
+            blogPost: posts.map((b) => ({ '@type': 'BlogPosting', headline: b.title, url: abs(`/blog/${b.slug}`), datePublished: b.date })),
+          },
+        ],
+      },
+    );
+
+  const postMatch = clean.match(/^\/blog\/([\w-]+)$/);
+  if (postMatch) {
+    const b = postBySlug(postMatch[1]);
+    if (!b) return null;
+    const p = `/blog/${b.slug}`;
+    const seo = page(p, b.title, b.description, {
+      crumbs: [HOME, BLOG, { name: b.title, path: p }],
+      type: 'article',
+      priority: 0.7,
+      extra: [
+        {
+          '@type': 'BlogPosting',
+          '@id': `${abs(p)}#article`,
+          headline: b.title,
+          description: b.description,
+          url: abs(p),
+          mainEntityOfPage: { '@id': `${abs(p)}#webpage` },
+          datePublished: b.date,
+          dateModified: b.date,
+          author: { '@id': PERSON_ID },
+          publisher: { '@id': ORG_ID },
+          image: abs(DEFAULT_IMAGE),
+          articleSection: b.category,
+          keywords: b.keywords.join(', '),
+          inLanguage: 'en',
+        },
+      ],
+    });
+    return { ...seo, lastmod: b.date };
+  }
+
   if (clean === '/about')
     return page(
       '/about',
@@ -266,7 +323,7 @@ export function getSeo(path: string): Seo | null {
     );
 
   if (clean === '/sitemap')
-    return page('/sitemap', `Sitemap | ${BRAND}`, 'Every page on the Umar Liaqat website: services, projects, about, experience and contact.', {
+    return page('/sitemap', `Sitemap | ${BRAND}`, 'Every page on the Umar Liaqat website: services, projects, blog, about, experience and contact.', {
       crumbs: [HOME, { name: 'Sitemap', path: '/sitemap' }],
       priority: 0.3,
       changefreq: 'yearly',
@@ -286,6 +343,8 @@ export const allPaths: string[] = [
   ...services.map((s) => `/services/${s.slug}`),
   '/projects',
   ...projects.map((p) => `/projects/${p.slug}`),
+  '/blog',
+  ...posts.map((b) => `/blog/${b.slug}`),
   '/about',
   '/experience',
   '/contact',
@@ -336,7 +395,7 @@ export function sitemapXml(lastmod: string) {
     .map((p) => getSeo(p)!)
     .map(
       (s) =>
-        `  <url>\n    <loc>${abs(s.path)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${s.changefreq}</changefreq>\n    <priority>${s.priority.toFixed(1)}</priority>\n  </url>`,
+        `  <url>\n    <loc>${abs(s.path)}</loc>\n    <lastmod>${s.lastmod ?? lastmod}</lastmod>\n    <changefreq>${s.changefreq}</changefreq>\n    <priority>${s.priority.toFixed(1)}</priority>\n  </url>`,
     )
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;

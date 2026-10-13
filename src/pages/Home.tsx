@@ -9,6 +9,8 @@ import { Hero } from '../sections/Hero';
 import { Founder } from '../sections/About';
 import { ProjectStack } from '../sections/Projects';
 import { Impact } from '../sections/Impact';
+import { posts } from '../blog';
+import { PostGrid } from './Blog';
 
 function ServicesOverview() {
   const root = useRef<HTMLElement>(null);
@@ -53,7 +55,23 @@ export default function Home() {
         }
       />
       <Impact n="05" />
-      <CtaBand n="06" />
+      <section className="section" data-scene="Insights">
+        <div className="container">
+          <div className="section-head">
+            <SceneLabel n="06">Insights</SceneLabel>
+            <h2 className="section-title">
+              From the <span className="gradient-text">blog.</span>
+            </h2>
+          </div>
+          <PostGrid items={posts.slice(0, 3)} />
+          <div className="section-foot">
+            <Link className="text-link" to="/blog">
+              Read all articles <ArrowUpRight width={16} height={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+      <CtaBand n="07" />
     </>
   );
 }

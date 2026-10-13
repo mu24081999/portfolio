@@ -10,6 +10,7 @@ const company = [
   { to: '/about', label: 'About' },
   { to: '/experience', label: 'Experience' },
   { to: '/projects', label: 'Projects' },
+  { to: '/blog', label: 'Blog' },
   { to: '/contact', label: 'Contact' },
   { to: '/sitemap', label: 'Sitemap' },
 ];

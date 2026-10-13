@@ -82,7 +82,7 @@ export const navLinks = [
   { to: '/services', label: 'Services' },
   { to: '/projects', label: 'Projects' },
   { to: '/about', label: 'About' },
-  { to: '/experience', label: 'Experience' },
+  { to: '/blog', label: 'Blog' },
   { to: '/contact', label: 'Contact' },
 ];
 

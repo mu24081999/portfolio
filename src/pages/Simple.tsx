@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { getSeo } from '../seo';
 import { experience, projects, services } from '../data';
+import { posts } from '../blog';
 import { CtaBand, PageHero } from '../components/Blocks';
 import { Founder } from '../sections/About';
 import { Skills } from '../sections/Skills';
@@ -74,6 +75,7 @@ export function SitemapPage() {
         { to: '/', label: 'Home' },
         { to: '/services', label: 'Services' },
         { to: '/projects', label: 'Projects' },
+        { to: '/blog', label: 'Blog' },
         { to: '/about', label: 'About' },
         { to: '/experience', label: 'Experience' },
         { to: '/contact', label: 'Contact' },
@@ -81,6 +83,7 @@ export function SitemapPage() {
     },
     { title: 'Services', links: services.map((s) => ({ to: `/services/${s.slug}`, label: s.title })) },
     { title: 'Case studies', links: projects.map((p) => ({ to: `/projects/${p.slug}`, label: p.title })) },
+    { title: 'Blog', links: posts.map((p) => ({ to: `/blog/${p.slug}`, label: p.title })) },
   ];
   return (
     <>
